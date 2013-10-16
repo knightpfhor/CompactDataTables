@@ -23,6 +23,9 @@ namespace KnightPfhor.Json
         /// <param name="serializer">The calling serializer.</param>
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
+            if (writer == null) throw new ArgumentNullException("writer");
+            if (serializer == null) throw new ArgumentNullException("serializer");
+
             var dataSet = (DataSet)value;
             var resolver = serializer.ContractResolver as DefaultContractResolver;
 
@@ -50,6 +53,9 @@ namespace KnightPfhor.Json
         /// <returns>The object value.</returns>
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
+            if (reader == null) throw new ArgumentNullException("reader");
+            if (objectType == null) throw new ArgumentNullException("objectType");
+
             if (reader.TokenType == JsonToken.Null)
             {
                 return null;
@@ -64,6 +70,8 @@ namespace KnightPfhor.Json
             DataSet ds = (objectType == typeof(DataSet))
               ? new DataSet()
               : (DataSet)Activator.CreateInstance(objectType);
+
+            ds.Locale = CultureInfo.CurrentCulture;
 
             var converter = new CompactDataTableConverter();
 
@@ -104,13 +112,13 @@ namespace KnightPfhor.Json
         /// <summary>
         /// Determines whether this instance can convert the specified value type.
         /// </summary>
-        /// <param name="valueType">Type of the value.</param>
+        /// <param name="objectType">Type of the value.</param>
         /// <returns>
         /// 	<c>true</c> if this instance can convert the specified value type; otherwise, <c>false</c>.
         /// </returns>
-        public override bool CanConvert(Type valueType)
+        public override bool CanConvert(Type objectType)
         {
-            return typeof(DataSet).IsAssignableFrom(valueType);
+            return typeof(DataSet).IsAssignableFrom(objectType);
         }
     }
 }

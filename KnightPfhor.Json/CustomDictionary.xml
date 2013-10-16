@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- For more details on what can go in here see: http://msdn.microsoft.com/en-us/library/bb514188.aspx -->
+<Dictionary>
+    <Words>
+        <Recognized>
+            <Word>Pfhor</Word>
+            <Word>StartObject</Word>
+            <Word>PropertyName</Word>
+            <Word>EndObject</Word>
+            <Word>StartArray</Word>
+            <Word>EndArray</Word>
+        </Recognized>
+    </Words>
+</Dictionary>

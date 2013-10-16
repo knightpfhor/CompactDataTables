@@ -19,6 +19,9 @@ namespace KnightPfhor.Json
         /// <param name="serializer">The calling serializer.</param>
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
+            if (writer == null) throw new ArgumentNullException("writer");
+            if (serializer == null) throw new ArgumentNullException("serializer");
+
             DataTable table = (DataTable)value;
 
             writer.WriteStartArray();
@@ -98,6 +101,9 @@ namespace KnightPfhor.Json
         /// <returns>The object value.</returns>
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
+            if (reader == null) throw new ArgumentNullException("reader");
+            if (objectType == null) throw new ArgumentNullException("objectType");
+
             if (reader.TokenType == JsonToken.Null)
             {
                 return null;
@@ -105,7 +111,7 @@ namespace KnightPfhor.Json
 
             if (reader.TokenType != JsonToken.StartArray)
             {
-                throw new JsonException(string.Format(CultureInfo.InvariantCulture, "DataTable must start with StartArray token not {0}", reader.TokenType));
+                throw new JsonException(string.Format(CultureInfo.InvariantCulture, "Expected StartArray token not {0}", reader.TokenType));
             }
 
             var dt = existingValue as DataTable;
@@ -116,6 +122,8 @@ namespace KnightPfhor.Json
                 dt = (objectType == typeof(DataTable))
                        ? new DataTable()
                        : (DataTable)Activator.CreateInstance(objectType);
+
+                dt.Locale = CultureInfo.CurrentCulture;
             }
 
             var columnTypes = new List<DataType>();
@@ -137,60 +145,12 @@ namespace KnightPfhor.Json
             while (reader.TokenType == JsonToken.PropertyName)
             {
                 var columnName = (string)reader.Value;
-                Type columnType;
 
                 reader.ReadAsInt32();
 
                 var dataType = (int)reader.Value;
 
-                switch (dataType)
-                {
-                    case (int)DataType.String:
-                        columnType = typeof(string);
-                        break;
-
-                    case (int)DataType.Boolean:
-                        columnType = typeof(bool);
-                        break;
-
-                    case (int)DataType.Int32:
-                        columnType = typeof(int);
-                        break;
-
-                    case (int)DataType.Int64:
-                        columnType = typeof(long);
-                        break;
-
-                    case (int)DataType.Byte:
-                        columnType = typeof(byte);
-                        break;
-
-                    case (int)DataType.Decimal:
-                        columnType = typeof(decimal);
-                        break;
-
-                    case (int)DataType.DateTime:
-                        columnType = typeof(DateTime);
-                        break;
-
-                    case (int)DataType.Float:
-                        columnType = typeof(float);
-                        break;
-
-                    case (int)DataType.Double:
-                        columnType = typeof(double);
-                        break;
-
-                    case (int)DataType.ByteArray:
-                        columnType = typeof(byte[]);
-                        break;
-
-                    default:
-                        throw new JsonException(string.Format("Invalid column type returned {0}",
-                            reader.Value));
-                }
-
-                dt.Columns.Add(new DataColumn(columnName, columnType));
+                dt.Columns.Add(new DataColumn(columnName, TypeFromDataType(dataType)));
 
                 columnTypes.Add((DataType)dataType);
 
@@ -214,38 +174,7 @@ namespace KnightPfhor.Json
 
                     for (int i = 0; i < dt.Columns.Count; i++)
                     {
-                        switch (columnTypes[i])
-                        {
-                            case DataType.String:
-                                reader.ReadAsString();
-                                break;
-
-                            case DataType.Int32:
-                                reader.ReadAsInt32();
-                                break;
-
-                            case DataType.ByteArray:
-                                reader.ReadAsBytes();
-                                break;
-
-                            case DataType.Decimal:
-                                reader.ReadAsDecimal();
-                                break;
-
-                            case DataType.DateTime:
-                                reader.ReadAsDateTime();
-                                break;
-
-                            // These types are dealt with, but there's no explicit reader method for them
-                            // so we just have to trust that it does the right thing.
-                            case DataType.Byte:
-                            case DataType.Int64:
-                            case DataType.Boolean:
-                            case DataType.Float:
-                            case DataType.Double:
-                                reader.Read();
-                                break;
-                        }
+                        ReadByDataType(reader, columnTypes[i]);
 
                         if (reader.TokenType == JsonToken.Null)
                         {
@@ -284,16 +213,105 @@ namespace KnightPfhor.Json
             return dt;
         }
 
+        private static void ReadByDataType(JsonReader reader, DataType dataType)
+        {
+            switch (dataType)
+            {
+                case DataType.String:
+                    reader.ReadAsString();
+                    break;
+
+                case DataType.Int32:
+                    reader.ReadAsInt32();
+                    break;
+
+                case DataType.ByteArray:
+                    reader.ReadAsBytes();
+                    break;
+
+                case DataType.Decimal:
+                    reader.ReadAsDecimal();
+                    break;
+
+                case DataType.DateTime:
+                    reader.ReadAsDateTime();
+                    break;
+
+                    // These types are dealt with, but there's no explicit reader method for them
+                    // so we just have to trust that it does the right thing.
+                case DataType.Byte:
+                case DataType.Int64:
+                case DataType.Boolean:
+                case DataType.Float:
+                case DataType.Double:
+                    reader.Read();
+                    break;
+            }
+        }
+
+        private static Type TypeFromDataType (int dataType)
+        {
+            Type columnType;
+
+            switch (dataType)
+            {
+                case (int) DataType.String:
+                    columnType = typeof (string);
+                    break;
+
+                case (int) DataType.Boolean:
+                    columnType = typeof (bool);
+                    break;
+
+                case (int) DataType.Int32:
+                    columnType = typeof (int);
+                    break;
+
+                case (int) DataType.Int64:
+                    columnType = typeof (long);
+                    break;
+
+                case (int) DataType.Byte:
+                    columnType = typeof (byte);
+                    break;
+
+                case (int) DataType.Decimal:
+                    columnType = typeof (decimal);
+                    break;
+
+                case (int) DataType.DateTime:
+                    columnType = typeof (DateTime);
+                    break;
+
+                case (int) DataType.Float:
+                    columnType = typeof (float);
+                    break;
+
+                case (int) DataType.Double:
+                    columnType = typeof (double);
+                    break;
+
+                case (int) DataType.ByteArray:
+                    columnType = typeof (byte[]);
+                    break;
+
+                default:
+                    throw new JsonException(string.Format(CultureInfo.InvariantCulture, "Invalid column type returned {0}", dataType));
+            }
+            
+            return columnType;
+        }
+
         /// <summary>
         /// Determines whether this instance can convert the specified value type.
         /// </summary>
-        /// <param name="valueType">Type of the value.</param>
+        /// <param name="objectType">Type of the value.</param>
         /// <returns>
         /// 	<c>true</c> if this instance can convert the specified value type; otherwise, <c>false</c>.
         /// </returns>
-        public override bool CanConvert(Type valueType)
+        public override bool CanConvert(Type objectType)
         {
-            return typeof(DataTable).IsAssignableFrom(valueType);
+            return typeof(DataTable).IsAssignableFrom(objectType);
         }
     }
 
