@@ -170,6 +170,33 @@ namespace KnightPfhor.Json.Tests
         }
 
         [TestMethod]
+        public void Int16CanBeDeserialized()
+        {
+            var converter = new CompactDataTableConverter();
+
+            var baseTable = new DataTable();
+
+            baseTable.Columns.Add("Int16 Data", typeof(short));
+
+            baseTable.Rows.Add(256);
+            baseTable.Rows.Add(-128);
+            baseTable.Rows.Add(0);
+            baseTable.Rows.Add(short.MinValue);
+            baseTable.Rows.Add(short.MaxValue);
+            baseTable.Rows.Add(DBNull.Value);
+
+            string serializedTable = JsonConvert.SerializeObject(baseTable, converter);
+
+            Trace.WriteLine(serializedTable);
+
+            var deserializedTable = (DataTable)JsonConvert.DeserializeObject(serializedTable, typeof(DataTable), converter);
+
+            AssertColumnsHaveSameDefinition(baseTable, deserializedTable);
+
+            AssertRowsHaveSameData(baseTable, deserializedTable);
+        }
+
+        [TestMethod]
         public void StringCanBeDeserialized()
         {
             var converter = new CompactDataTableConverter();

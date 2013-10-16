@@ -11,12 +11,13 @@ namespace KnightPfhor.Json
         String = 0,
         Boolean = 1,
         Byte = 2,
-        Int32 = 3,
-        Int64 = 4,
-        DateTime = 5,
+        Int16 = 3,
+        Int32 = 4,
+        Int64 = 5,
         Decimal = 6,
         Float = 7,
         Double = 8,
-        ByteArray = 9
+        DateTime = 9,
+        ByteArray = 10
     }
 }

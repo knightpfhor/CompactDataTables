@@ -36,6 +36,14 @@ namespace KnightPfhor.Json
                 {
                     writer.WriteValue((int)DataType.Boolean);
                 }
+                else if (column.DataType == typeof(byte))
+                {
+                    writer.WriteValue((int)DataType.Byte);
+                }
+                else if (column.DataType == typeof(short))
+                {
+                    writer.WriteValue((int)DataType.Int16);
+                }
                 else if (column.DataType == typeof(int))
                 {
                     writer.WriteValue((int)DataType.Int32);
@@ -43,10 +51,6 @@ namespace KnightPfhor.Json
                 else if (column.DataType == typeof(long))
                 {
                     writer.WriteValue((int)DataType.Int64);
-                }
-                else if (column.DataType == typeof(byte))
-                {
-                    writer.WriteValue((int)DataType.Byte);
                 }
                 else if (column.DataType == typeof(decimal))
                 {
@@ -60,13 +64,13 @@ namespace KnightPfhor.Json
                 {
                     writer.WriteValue((int)DataType.Double);
                 }
-                else if (column.DataType == typeof(DateTime))
-                {
-                    writer.WriteValue((int)DataType.DateTime);
-                }
                 else if (column.DataType == typeof(byte[]))
                 {
                     writer.WriteValue((int)DataType.ByteArray);
+                }
+                else if (column.DataType == typeof(DateTime))
+                {
+                    writer.WriteValue((int)DataType.DateTime);
                 }
                 else
                 {
@@ -221,6 +225,7 @@ namespace KnightPfhor.Json
                     reader.ReadAsString();
                     break;
 
+                case DataType.Int16:
                 case DataType.Int32:
                     reader.ReadAsInt32();
                     break;
@@ -237,8 +242,8 @@ namespace KnightPfhor.Json
                     reader.ReadAsDateTime();
                     break;
 
-                    // These types are dealt with, but there's no explicit reader method for them
-                    // so we just have to trust that it does the right thing.
+                // These types are dealt with, but there's no explicit reader method for them
+                // so we just have to trust that it does the right thing.
                 case DataType.Byte:
                 case DataType.Int64:
                 case DataType.Boolean:
@@ -249,56 +254,60 @@ namespace KnightPfhor.Json
             }
         }
 
-        private static Type TypeFromDataType (int dataType)
+        private static Type TypeFromDataType(int dataType)
         {
             Type columnType;
 
             switch (dataType)
             {
-                case (int) DataType.String:
-                    columnType = typeof (string);
+                case (int)DataType.String:
+                    columnType = typeof(string);
                     break;
 
-                case (int) DataType.Boolean:
-                    columnType = typeof (bool);
+                case (int)DataType.Boolean:
+                    columnType = typeof(bool);
                     break;
 
-                case (int) DataType.Int32:
-                    columnType = typeof (int);
+                case (int)DataType.Byte:
+                    columnType = typeof(byte);
                     break;
 
-                case (int) DataType.Int64:
-                    columnType = typeof (long);
+                case (int)DataType.Int16:
+                    columnType = typeof(short);
                     break;
 
-                case (int) DataType.Byte:
-                    columnType = typeof (byte);
+                case (int)DataType.Int32:
+                    columnType = typeof(int);
                     break;
 
-                case (int) DataType.Decimal:
-                    columnType = typeof (decimal);
+                case (int)DataType.Int64:
+                    columnType = typeof(long);
                     break;
 
-                case (int) DataType.DateTime:
-                    columnType = typeof (DateTime);
+                case (int)DataType.Decimal:
+                    columnType = typeof(decimal);
                     break;
 
-                case (int) DataType.Float:
-                    columnType = typeof (float);
+                case (int)DataType.Float:
+                    columnType = typeof(float);
                     break;
 
-                case (int) DataType.Double:
-                    columnType = typeof (double);
+                case (int)DataType.Double:
+                    columnType = typeof(double);
                     break;
 
-                case (int) DataType.ByteArray:
-                    columnType = typeof (byte[]);
+                case (int)DataType.ByteArray:
+                    columnType = typeof(byte[]);
+                    break;
+
+                case (int)DataType.DateTime:
+                    columnType = typeof(DateTime);
                     break;
 
                 default:
                     throw new JsonException(string.Format(CultureInfo.InvariantCulture, "Invalid column type returned {0}", dataType));
             }
-            
+
             return columnType;
         }
 
